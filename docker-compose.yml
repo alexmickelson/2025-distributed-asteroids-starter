@@ -10,8 +10,6 @@ services:
     container_name: zipkin
     environment:
       - STORAGE_TYPE=mem
-    ports:
-      - 9411:9411
   tempo:
     image: grafana/tempo:latest
     container_name: tempo
@@ -52,5 +50,3 @@ services:
   loki:
     image: grafana/loki:3.4
     container_name: loki
-    ports:
-      - "3100:3100"
