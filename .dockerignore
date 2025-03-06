@@ -1,0 +1,8 @@
+configs/
+dev.Dockerfile
+docker-compose.yml
+Readme.md
+.gitignore
+.dockerignore
+**/bin/
+**/obj/

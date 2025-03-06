@@ -1,0 +1,48 @@
+# apiVersion: apps/v1
+# kind: StatefulSet
+# metadata:
+#   name: node
+#   namespace: ${NAMESPACE}
+# spec:
+#   serviceName: node-svc
+#   replicas: 3
+#   podManagementPolicy: Parallel
+#   updateStrategy:
+#     type: RollingUpdate
+#     rollingUpdate:
+#       maxUnavailable: 3
+#       # partition: -1
+#   selector:
+#     matchLabels:
+#       app: node
+#   template:
+#     metadata:
+#       labels:
+#         app: node
+#     spec:
+#       terminationGracePeriodSeconds: 30
+#       containers:
+#         - name: pbm-sidecar
+#           image: petabridge/pbm:latest
+#           lifecycle:
+#             preStop:
+#               exec:
+#                 command: ["/bin/sh", "-c", "pbm cluster leave"]
+#         - name: node
+#           image: yourImageName:${IMAGE_TAG}
+#           ports:
+#             - containerPort: 8080
+#             - containerPort: 8110
+#           env:
+#             - name: NODE_NAME
+#               valueFrom:
+#                 fieldRef:
+#                   fieldPath: metadata.name
+#             - name: AKKA_CLUSTER_URL
+#               value: "$(NODE_NAME).node-svc"
+#             - name: SEED_NODE_URLS
+#               value: akka.tcp://your actor system name here@lighthouse-0.lighthouse-svc:8110,akka.tcp://your actor system name here@lighthouse-1.lighthouse-svc:8110,akka.tcp://your actor system name here@lighthouse-2.lighthouse-svc:8110
+#             - name: PERSISTENCE_CONNECTION_STRING
+#               value: Host=asteroids-db-svc;Port=5432;Username=akkauser;Password=akkapassword;Database=akkadb;
+#             - name: COLLECTOR_URL
+#               value: http://collector-svc:4317/

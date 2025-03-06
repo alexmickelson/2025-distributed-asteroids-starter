@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: asteroids-db-dep
+  namespace: ${NAMESPACE}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: asteroids-db
+  template:
+    metadata:
+      labels:
+        app: asteroids-db
+    spec:
+      containers:
+        - name: asteroids-db
+          image: postgres:17
+          env:
+            - name: POSTGRES_USER
+              value: "akkauser"
+            - name: POSTGRES_PASSWORD
+              value: "akkapassword"
+            - name: POSTGRES_DB
+              value: "akkadb"
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: asteroids-db-storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: asteroids-db-storage
+          persistentVolumeClaim:
+            claimName: asteroids-db-pvc

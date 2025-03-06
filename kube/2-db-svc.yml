@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: asteroids-db-svc
+  namespace: ${NAMESPACE}
+spec:
+  selector:
+    app: asteroids-db
+  ports:
+    - port: 5432
+      targetPort: 5432
+  type: ClusterIP

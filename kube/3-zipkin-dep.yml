@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zipkin-dep
+  namespace: ${NAMESPACE}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zipkin
+  template:
+    metadata:
+      labels:
+        app: zipkin
+    spec:
+      containers:
+        - name: zipkin
+          image: ghcr.io/openzipkin/zipkin-slim:latest
+          env:
+            - name: STORAGE_TYPE
+              value: "mem"
+          ports:
+            - containerPort: 9411

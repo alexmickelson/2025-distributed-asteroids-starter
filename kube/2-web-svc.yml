@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-svc
+  namespace: ${NAMESPACE}
+spec:
+  selector:
+    app: web
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: web
+    - port: 8110
+      targetPort: 8110
+      name: cluster
+  type: ClusterIP

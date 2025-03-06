@@ -1,0 +1,56 @@
+services:
+  collector:
+    image: otel/opentelemetry-collector-contrib
+    container_name: collector
+    volumes:
+      - ./configs/otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
+
+  zipkin:
+    image: ghcr.io/openzipkin/zipkin-slim
+    container_name: zipkin
+    environment:
+      - STORAGE_TYPE=mem
+    ports:
+      - 9411:9411
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./configs/tempo.yml:/etc/tempo.yaml
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - --enable-feature=promql-experimental-functions
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-remote-write-receiver
+      - --enable-feature=exemplar-storage
+    restart: unless-stopped
+    volumes:
+      - ./configs/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    # dashboard URL: http://localhost:3001/d/bdgrljsxg79j4e/asteroids-dashboard?orgId=1&refresh=1s
+    image: grafana/grafana
+    container_name: grafana
+    user: 1000:1000
+    ports:
+      - 3001:3000
+    restart: unless-stopped
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor traceQLStreaming metricsSummary
+    volumes:
+      - ./configs/grafana/grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./configs/grafana/dashboard-config.yml:/etc/grafana/provisioning/dashboards/main.yaml
+      - ./configs/grafana/asteroids.json:/var/lib/grafana/dashboards/asteroids.json
+      - ./configs/grafana/grafana.ini:/etc/grafana/grafana.ini # needed for 1s refresh
+
+  loki:
+    image: grafana/loki:3.4
+    container_name: loki
+    ports:
+      - "3100:3100"

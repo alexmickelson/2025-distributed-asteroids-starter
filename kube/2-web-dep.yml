@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-dep
+  namespace: ${NAMESPACE}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: pbm-sidecar
+          image: petabridge/pbm:latest
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "pbm cluster leave"]
+        - name: web
+          image: yourImageName:${IMAGE_TAG}
+          ports:
+            - containerPort: 8080
+            - containerPort: 8110
+          env:
+            # adjust this to your own needs
+            - name: NODE_NAME
+              value: "web"
+            - name: AKKA_CLUSTER_URL
+              value: "web-svc"
+            - name: SEED_NODE_URLS
+              value: "akka.tcp://your actor system name here@lighthouse-0.lighthouse-svc:8110,akka.tcp://your actor system name here@lighthouse-1.lighthouse-svc:8110,akka.tcp://your actor system name here@lighthouse-2.lighthouse-svc:8110"
+            - name: GRAFANA_URL
+              value: http://your grafana url here/d/bdgrljsxg79j4e/asteroids-dashboard?orgId=1&from=now-3h&to=now&timezone=browser&var-service_name=node-0&var-service_name=node-1&var-service_name=node-2&var-service_name=web&refresh=1s
+            - name: COLLECTOR_URL
+              value: http://collector-svc:4317/
