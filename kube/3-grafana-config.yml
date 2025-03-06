@@ -23,12 +23,12 @@ data:
       type: prometheus
       uid: prometheus
       url: http://prometheus-svc:9090 
-      isDefault: true
       access: proxy
       editable: false
       jsonData:
         httpMethod: GET
     - name: Loki
+      isDefault: true
       type: loki
       access: proxy 
       url: http://loki-svc:3100
